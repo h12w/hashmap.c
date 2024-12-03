@@ -42,7 +42,7 @@ struct hashmap {
     size_t cap;
     uint64_t seed0;
     uint64_t seed1;
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1);
+    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1, void *udata);
     int (*compare)(const void *a, const void *b, void *udata);
     void (*elfree)(void *item);
     void *udata;
@@ -95,7 +95,7 @@ static uint64_t clip_hash(uint64_t hash) {
 }
 
 static uint64_t get_hash(struct hashmap *map, const void *key) {
-    return clip_hash(map->hash(key, map->seed0, map->seed1));
+    return clip_hash(map->hash(key, map->seed0, map->seed1, map->udata));
 }
 
 
@@ -104,7 +104,7 @@ static uint64_t get_hash(struct hashmap *map, const void *key) {
 struct hashmap *hashmap_new_with_allocator(void *(*_malloc)(size_t), 
     void *(*_realloc)(void*, size_t), void (*_free)(void*),
     size_t elsize, size_t cap, uint64_t seed0, uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
+    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1, void *udata),
     int (*compare)(const void *a, const void *b, void *udata),
     void (*elfree)(void *item),
     void *udata)
@@ -180,7 +180,7 @@ struct hashmap *hashmap_new_with_allocator(void *(*_malloc)(size_t),
 // unless you're storing some kind of reference data in the hash.
 struct hashmap *hashmap_new(size_t elsize, size_t cap, uint64_t seed0, 
     uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
+    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1, void *udata),
     int (*compare)(const void *a, const void *b, void *udata),
     void (*elfree)(void *item),
     void *udata)
